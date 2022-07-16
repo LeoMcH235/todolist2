@@ -8,27 +8,15 @@ export function TodoList() {
   const [todos, setTodos] = useState([]);
 
   const taskRef = useRef();
-
-  /* Permite almacenar los datos en el nabegador */
-/*   useEffect(() => {
-
-    const storedTodos = JSON.parse(localStorage.getItem(KEY));
-    if (storedTodos){
-        setTodos(storedTodos);
-    }
-}, [])
-
-  useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify(todos));
-  }, [todos]);
- */
-  /* Fin de reglas */
+  const descRef = useRef();
 
   const agregarTarea = () => {
     const task = taskRef.current.value;
-    console.log(task);
+    const desc = descRef.current.value;
 
-    if (task === "") return;
+    console.log(task, desc);
+
+    if (task === "" && desc === "") return;
     console.log("Agregando tarea...");
 
     /* Metodo que esta definido por react para operar los elementos */
@@ -37,6 +25,7 @@ export function TodoList() {
       const newTask = {
         id: uuid(),
         task: task,
+        desc: desc,
         completed: false
       };
 
@@ -44,13 +33,16 @@ export function TodoList() {
     });
 
     taskRef.current.value = null;
+    descRef.current.value = null;
+
   };
+
 
 
   const ResumenTareas = () => {
     const cant = cantidadTareas()
 
-    if(cant === 0){
+    if (cant === 0) {
       return (
         <div className="alert alert-success mt-3">
           Felicidades no tienes tareas pendientes :)
@@ -58,7 +50,7 @@ export function TodoList() {
       )
     }
 
-    if(cant === 1){
+    if (cant === 1) {
       return (
         <div className="alert alert-info mt-3">
           Te queda solamente una tarea pendiente!!
@@ -75,7 +67,7 @@ export function TodoList() {
   }
 
   const cantidadTareas = () => {
-      return todos.filter((todo) => !todo.completed).length;
+    return todos.filter((todo) => !todo.completed).length;
   }
 
   const cambiarEstadoTarea = (id) => {
@@ -83,41 +75,54 @@ export function TodoList() {
     /* Tomamos los datos de la lista actuales */
     const newTodos = [...todos]
     /* Buscar el elemento con nuestro id */
-    const todo = newTodos.find((todo) => todo.id ===id)
+    const todo = newTodos.find((todo) => todo.id === id)
     /* Cambiamos el estado al caso contrario */
     todo.completed = !todo.completed
+    if (todo.completed) {
+      setTodos(todo.cambiarEstadoTarea)
+    }
     /* Setear y actualizar la lista */
     setTodos(newTodos)
   }
 
-  const eliminarTareasCompletas = () => {
-    /* Se seleccionan todas las tareas que aun no se hacen */
+  const eliminarTareasImportantes = () => {
+    /* Se seleccionan todas las tareas que no estan completas */
     const newTodos = todos.filter((todo) => !todo.completed)
     setTodos(newTodos)
- }
+  }
 
 
   return (
     <Fragment>
-      <h1>Listado de Tareas</h1>
+      <h1><strong>Post It Simulator!</strong></h1>
       <div className="input-group my-4">
+        {/* Campo titulo */}
         <input
           ref={taskRef}
           type="text"
           placeholder="Ingrese una tarea"
-          className="form-control"
+          className="input-group form-control"
         />
-        <button onClick={agregarTarea} className="btn btn-success ms-2">
-          +
-        </button>
-        <button onClick={eliminarTareasCompletas} className='btn btn-danger ms-2'>
-        <i class="bi bi-trash"></i>
+        {/* Campo descripcion */}
+        <input
+          ref={descRef}
+          type="text"
+          placeholder="Ingrese descripcion"
+          className="input-group form-control ms-2"
+        />
+        <div className="col-md-3">
+          <input type="checkbox" value="importante" className="checkmark form-check-input ms-4" />
 
+          <label className="text-blanco">Importante!</label>
+        </div>
+
+
+        <button onClick={agregarTarea} className="btn btn-agregar btn-success ms-2">
+          Agregar
         </button>
       </div>
 
       <ul className="list-group">
-        {/* Investigar que más se puede hacer con el método map */}
         {todos.map((todo) => (
           <TodoItem todo={todo} key={todo.id} cambiarEstado={cambiarEstadoTarea}></TodoItem>
         ))}
@@ -125,5 +130,6 @@ export function TodoList() {
 
       <ResumenTareas />
     </Fragment>
+
   );
 }
